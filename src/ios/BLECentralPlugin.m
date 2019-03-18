@@ -24,6 +24,9 @@
 }
 - (CBPeripheral *)findPeripheralByUUID:(NSString *)uuid;
 - (void)stopScanTimer:(NSTimer *)timer;
+
+@property (nonatomic, strong) NSMutableDictionary * counts;
+
 @end
 
 @implementation BLECentralPlugin
@@ -55,6 +58,7 @@
                        @"off", @(CBCentralManagerStatePoweredOff),
                        @"on", @(CBCentralManagerStatePoweredOn),
                        nil];
+    self.counts = [NSMutableDictionary new];
     readRSSICallbacks = [NSMutableDictionary new];
 }
 
@@ -598,11 +602,19 @@
             @"data" :[data base64EncodedStringWithOptions:0]
         };
         
+        int count = 0;
+        if(self.counts[key] != nil) {
+            NSNumber *num = self.counts[key];
+            count = [num intValue];
+        }
+        
         NSDictionary *result = @{
-            @"counter" : @1,
+            @"counter" : @(count),
             @"value" : stingifiedData
         };
 
+        self.counts[key] = [NSNumber numberWithInt:count+1];
+        
         CDVPluginResult *pluginResult = nil;
         if (error) {
             NSLog(@"%@", error);
