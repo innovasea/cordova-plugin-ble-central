@@ -52,6 +52,7 @@ public class Peripheral extends BluetoothGattCallback {
     private boolean connecting = false;
     private ConcurrentLinkedQueue<BLECommand> commandQueue = new ConcurrentLinkedQueue<BLECommand>();
     private boolean bleProcessing;
+    private int notificationCounter = 0;
 
     BluetoothGatt gatt;
 
@@ -390,7 +391,16 @@ public class Peripheral extends BluetoothGattCallback {
         CallbackContext callback = notificationCallbacks.get(generateHashKey(characteristic));
 
         if (callback != null) {
-            PluginResult result = new PluginResult(PluginResult.Status.OK, characteristic.getValue());
+            this.notificationCounter++;
+            JSONObject json = new JSONObject();
+            try {
+                json.put("value", byteArrayToJSON(characteristic.getValue()));
+                json.put("counter", this.notificationCounter);
+            } catch (JSONException e) { // this shouldn't happen
+                e.printStackTrace();
+            }
+
+            PluginResult result = new PluginResult(PluginResult.Status.OK, json);
             result.setKeepCallback(true);
             callback.sendPluginResult(result);
         }
