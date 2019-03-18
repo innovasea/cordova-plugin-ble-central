@@ -593,12 +593,22 @@
     if (notifyCallbackId) {
         NSData *data = characteristic.value; // send RAW data to Javascript
 
+        NSDictionary *stingifiedData = @{
+            @"CDVType" : @"ArrayBuffer",
+            @"data" :[data base64EncodedStringWithOptions:0]
+        };
+        
+        NSDictionary *result = @{
+            @"counter" : @1,
+            @"value" : stingifiedData
+        };
+
         CDVPluginResult *pluginResult = nil;
         if (error) {
             NSLog(@"%@", error);
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
         } else {
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArrayBuffer:data];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
         }
 
         [pluginResult setKeepCallbackAsBool:TRUE]; // keep for notification
